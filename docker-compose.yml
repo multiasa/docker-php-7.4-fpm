@@ -1,0 +1,46 @@
+version: "3"
+services:
+
+    app:
+        build: .
+        container_name: satgas-app
+        working_dir: /var/www/
+        volumes:
+            - ./www:/var/www
+            - ./sessions:/var/www/application/sessions
+        #env_file:
+        restart: always
+        #- ./.env
+        networks:
+            - satgas-network
+
+    nginx:
+        image: nginx:alpine
+        container_name: satgas-nginx
+        ports:
+            - 8010:80
+        volumes:
+            - ./www:/var/www
+            - ./nginx/conf.d/:/etc/nginx/conf.d/
+        #env_file:
+        #- ./.env
+        restart: always
+        networks:
+            - satgas-network
+
+    npm:
+        image: node:13.7
+        container_name: satgas-npm
+        volumes:
+            - ./www/writable:/var/www/writable
+        ports:
+            - 3000:3000
+            - 3001:3001
+        working_dir: /var/www/writable
+        entrypoint: ['npm']
+        networks:
+            - satgas-network
+
+networks:
+    satgas-network:
+        driver: bridge
